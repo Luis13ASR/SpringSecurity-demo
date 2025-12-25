@@ -15,9 +15,11 @@ public class SecurityConfig{
         
         return httpSecurity
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers("/login").permitAll()
+                .anyRequest().authenticated()
         )
-        .formLogin(form -> form.disable())
+        .formLogin(form -> form.permitAll().defaultSuccessUrl("/api/v1/roles"))
+        .logout(logout -> logout.permitAll())
         .csrf(csrf -> csrf.disable())
         .build();
     }

@@ -3,6 +3,10 @@ package com.example.demo.Services.Impl;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -17,7 +21,7 @@ import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Services.UserService;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService, UserDetailsService{
     
     private UserRepository userRepository;
     private RolRepository rolesRepository;
@@ -27,6 +31,17 @@ public class UserServiceImpl implements UserService{
         this.userRepository = userRepository;
         this.rolesRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
+        UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("the user was not found"));
+
+        return User
+        .withUsername(userEntity.getUsername())
+        .password(userEntity.getPassword())
+        .roles(userEntity.getIdRol().getName())
+        .build();
     }
 
     @Override
